@@ -29,7 +29,7 @@ function gen_table() {
                 s += `<td>${col}</td>`;
             } else {
                 if(col["type"]=="datetime") {
-                    s += '<td style = "width: 200px;"><input type="date" class = "form-control" required/><br/><input type="time" class = "form-control"/></td>'
+                    s += '<td style = "width: 200px;"><input type="text" id = "datetimep" class = "form-control" required/>'
                 } else if(col["type"]=="text") {
                     s += '<td style = "width: 200px;"><input type="text" class = "form-control"/></td>'
                 } else {
@@ -40,6 +40,7 @@ function gen_table() {
         s += '</tr>';
     });
     all_values_table.innerHTML = s;
+    $("#datetimep").appendDtpicker();
     return s;
 }
 function save_data(f) {
@@ -75,12 +76,38 @@ function update_saved_data() {
                     <div class = "btn-group-vertical" role = "group">
                         <button type = "button" class = "btn btn-primary" onclick = "show_data('${field_date}');">Show data</button>
                         <button tpye = "button" class = "btn btn-primary" onclick = "edit_data('${field_date}');">Edit data</button>
+                        <button tpye = "button" class = "btn btn-primary" onclick = "download_data('${field_date}');">Download data</button>
                     </div>
                 </div>
             </div>
         `;
     }
     saved_data_div.innerHTML = htm;
+}
+function show_data(field_date) {
+}
+function edit_data(field_date) {
+}
+function download_data(field_date) {
+    let csv_file_contents = "";
+    let all_fields = JSON.parse(localStorage.getItem("all_fields"));
+    table_structure.forEach(function(row, index) {
+        row.forEach(function(field, index2) {
+            if(typeof(field)=="object") {
+                csv_file_contents+=`"${all_fields[field_date][index][index2]}",`
+            } else {
+                csv_file_contents+=`"${field}",`
+            }
+        });
+        csv_file_contents+='\n';
+    });
+    let a = document.createElement("a");
+    let b = new Blob([csv_file_contents], {"type":"text/plain"});
+    let bu = URL.createObjectURL(b);
+    a.href = bu;
+    a.filename = field_date + '.csv';
+    a.download = a.filename;
+    a.dispatchEvent(new MouseEvent("click"));
 }
 window.onload = function() {
     all_values_table = document.getElementById("all_values");
